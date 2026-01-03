@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<schemalist>
+
+    <schema path="/org/gnome/shell/extensions/bottom-dash-panel/" id="org.gnome.shell.extensions.bottom-dash-panel">
+
+        <key type="i" name="dash-scale-factor">
+            <default>50</default>
+            <summary>Dash scale factor (%)</summary>
+        </key>
+
+    </schema>
+
+</schemalist>

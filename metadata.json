@@ -1,0 +1,17 @@
+{
+  "description": "Turn the native GNOME dash into a bottom panel.\n\n Settings: panel height.\n\n There is no multi-monitor support.\n\n Very short code, very light extension: the dash object is the GNOME dash itself, so no new object is created.",
+  "name": "Bottom Dash Panel",
+  "shell-version": [
+    "46",
+    "47",
+    "48",
+    "49"
+  ],
+  "url": "https://github.com/fthx/bottom-dash-panel",
+  "uuid": "bottom-dash-panel@fthx",
+  "settings-schema": "org.gnome.shell.extensions.bottom-dash-panel",
+  "version": 999,
+  "donations": {
+    "paypal": "fthx75"
+  }
+}

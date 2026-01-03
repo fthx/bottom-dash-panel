@@ -1,0 +1,14 @@
+.bottom-dash-panel {
+    margin: 0px;
+    padding: 0px;
+}
+
+.bottom-dash-panel .dash-background {
+    margin: 0px;
+    border-radius: 0px;
+}
+
+.bottom-dash-panel-no-padding {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
