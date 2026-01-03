@@ -161,9 +161,6 @@ export default class BottomDashPanelExtension extends Extension {
     }
 
     disable() {
-        this._settings?.disconnectObject(this);
-        this._settings = null;
-
         if (this._initTimeout) {
             GLib.Source.remove(this._initTimeout);
             this._initTimeout = null;
@@ -173,5 +170,8 @@ export default class BottomDashPanelExtension extends Extension {
 
         this._bottomDashPanel?.destroy();
         this._bottomDashPanel = null;
+
+        this._settings?.disconnectObject(this);
+        this._settings = null;
     }
 }
