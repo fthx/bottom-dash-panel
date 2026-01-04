@@ -1,14 +1,37 @@
-.bottom-dash-panel {
-    margin: 0px;
-    padding: 0px;
+.bottom-dash-panel #dash {
+    padding: 0;
 }
 
-.bottom-dash-panel .dash-background {
-    margin: 0px;
-    border-radius: 0px;
+.bottom-dash-panel #dash .dash-background {
+    border-radius: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 4px;
 }
 
-.bottom-dash-panel-no-padding {
-    padding-top: 0px;
-    padding-bottom: 0px;
+.bottom-dash-panel .dash-item-container .overview-tile {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.bottom-dash-panel .dash-item-container .overview-tile .app-grid-running-dot {
+    margin-bottom: 0;
+    offset-y: -2px;
+}
+
+.bottom-dash-panel #dash .dash-item-container .app-well-app,
+.bottom-dash-panel #dash .dash-item-container .show-apps {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.bottom-dash-panel .dash-separator {
+    width: 0;
+    height: 0;
+    spacing: 0;
+    padding: 0;
+    margin: 0;
 }

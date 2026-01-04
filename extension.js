@@ -25,16 +25,13 @@ const BottomDashPanel = GObject.registerClass(
         _initDash() {
             this._dash = Main.overview.dash;
 
-            this._dash.add_style_class_name('bottom-dash-panel');
-            this._dash.showAppsButton.add_style_class_name('bottom-dash-panel-no-padding');
             this._dash.reactive = true;
             this._dash._background.reactive = true;
+
             this._dash._background.opacity = (this._settings?.get_int('dash-background-opacity') ?? 100) / 100 * 255;
+
             this._dash.set_pivot_point(0.5, 1.0);
             this._dash._background.set_pivot_point(0.5, 1.0);
-
-            this._dash.connectObject('scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event), this);
-            this._dash.showAppsButton.connectObject('notify::checked', () => this._onShowAppsButtonClicked(), this);
 
             if (Main.overview._overview._controls.get_children().includes(this._dash)) {
                 Main.overview._overview._controls.remove_child(this._dash);
@@ -43,8 +40,15 @@ const BottomDashPanel = GObject.registerClass(
                 });
             }
 
+            Main.layoutManager.uiGroup.add_style_class_name('bottom-dash-panel');
+
+            this._dash.connectObject(
+                'icon-size-changed', () => this._setDash(),
+                'scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event),
+                this);
+            this._dash.showAppsButton.connectObject('notify::checked', () => this._onShowAppsButtonClicked(), this);
+
             this._setDash();
-            this._dash._box.connectObject('child-added', (actor, item) => this._setDotStyle(item), this);
         }
 
         _onShowAppsButtonClicked() {
@@ -52,30 +56,17 @@ const BottomDashPanel = GObject.registerClass(
                 Main.overview.showApps();
         }
 
-        _setDotStyle(item) {
-            if (!item?.child || !this._scaleFactor)
+        _setDash() {
+            if (this._dashTimeout)
                 return;
 
-            item.child.add_style_class_name('bottom-dash-panel-no-padding');
-            item.child._dot.width = this._dash.iconSize * 0.5;
-            item.child._dot.height = this._scaleFactor * 3;
-        }
-
-        _setDash() {
             this._dashTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                 const monitor = Main.layoutManager.primaryMonitor;
-
                 if (monitor) {
                     const { width: width, height: height, x, y } = monitor;
-                    this._scaleFactor = global.display.get_monitor_scale(monitor);
-                    this._dashScale = (this._settings?.get_int('dash-scale-factor') ?? 100) / 100;
-
-                    this._dash.set_scale(this._dashScale, this._dashScale);
                     this._dash._background.width = width;
-                    this._dash._background.scale_x = 1 / this._dashScale;
                     this._dash.set_position(x, y + height - this._dash.height);
-
-                    this._dash._box.get_children().forEach(item => this._setDotStyle(item));
+                    //this._dash.setMaxSize(width, 48);
                 }
 
                 this._dashTimeout = null;
@@ -90,33 +81,24 @@ const BottomDashPanel = GObject.registerClass(
             }
 
             this._dash.disconnectObject(this);
-            this._dash._box.disconnectObject(this);
             this._dash.showAppsButton.disconnectObject(this);
 
             this._dash.reactive = false;
-            this._dash.remove_style_class_name('bottom-dash-panel');
-            this._dash.set_scale(1, 1);
+            this._dash._background.reactive = false;
+            this._dash._background.opacity = 255;
+            this._dash.set_pivot_point(0.0, 0.0);
+            this._dash._background.set_pivot_point(0.0, 0.0);
+            this._dash._background.width = -1;
             this._dash.set_size(-1, -1);
             this._dash.set_position(-1, -1);
             this._dash.setMaxSize(-1, -1);
-
-            this._dash._background.reactive = false;
-            this._dash._background.width = -1;
-            this._dash._background.scale_x = 1;
-
-            this._dash.set_pivot_point(0.0, 0.0);
-            this._dash._background.set_pivot_point(0.0, 0.0);
-
-            this._dash.showAppsButton.remove_style_class_name('bottom-dash-panel-no-padding');
-            this._dash._box.get_children().forEach(item => {
-                item.child?.remove_style_class_name('bottom-dash-panel-no-padding');
-                item.child?._dot.set_size(-1, -1);
-            });
 
             if (this._dash.get_parent() === Main.layoutManager.uiGroup) {
                 Main.layoutManager.removeChrome(this._dash);
                 Main.overview._overview._controls.add_child(this._dash);
             }
+
+            Main.layoutManager.uiGroup.remove_style_class_name('bottom-dash-panel');
 
             Main.overview.show();
         }
@@ -128,6 +110,8 @@ export default class BottomDashPanelExtension extends Extension {
     }
 
     _initBottomDashPanel() {
+        Main.overview.hide();
+
         if (this._initTimeout)
             return;
 

@@ -18,20 +18,6 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         const group = new Adw.PreferencesGroup();
         page.add(group);
 
-        const adjustmentDashScaleFactor = new Gtk.Adjustment({
-            lower: 10,
-            upper: 100,
-            step_increment: 5,
-        });
-
-        const dashScaleFactor = new Adw.SpinRow({
-            title: 'Dash scale factor (%)',
-            subtitle: '100% is the dash natural height in overview.',
-            adjustment: adjustmentDashScaleFactor,
-        });
-        group.add(dashScaleFactor);
-        window._settings.bind('dash-scale-factor', dashScaleFactor, 'value', Gio.SettingsBindFlags.DEFAULT);
-
         const adjustmentDashBackgroundOpacity = new Gtk.Adjustment({
             lower: 0,
             upper: 100,

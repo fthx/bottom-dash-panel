@@ -6,11 +6,13 @@
 
         <key type="i" name="dash-scale-factor">
             <default>50</default>
+            <range min="10" max="100"/>
             <summary>Dash scale factor (%)</summary>
         </key>
 
         <key type="i" name="dash-background-opacity">
             <default>100</default>
+            <range min="0" max="100"/>
             <summary>Dash background opacity (%)</summary>
         </key>
 
