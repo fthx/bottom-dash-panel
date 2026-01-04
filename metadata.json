@@ -1,5 +1,5 @@
 {
-  "description": "Turn the native GNOME dash into a bottom panel.\n\n Settings: panel height.\n\n There is no multi-monitor support.\n\n Very short code, very light extension: the dash object is the GNOME dash itself, so no new object is created.",
+  "description": "Turn the native GNOME dash into a bottom panel.\n\n Settings: panel height, panel background opacity.\n\n There is no multi-monitor support.\n\n Very short code, very light extension: the dash object is the GNOME dash itself, so no new object is created.\n\n You can consider installing Panel Free extension (https://extensions.gnome.org/extension/6454/panel-free/) which allows to display only this bottom panel, the top panel is only shown in overview.",
   "name": "Bottom Dash Panel",
   "shell-version": [
     "46",

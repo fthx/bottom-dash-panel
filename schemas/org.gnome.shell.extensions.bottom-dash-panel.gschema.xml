@@ -9,6 +9,11 @@
             <summary>Dash scale factor (%)</summary>
         </key>
 
+        <key type="i" name="dash-background-opacity">
+            <default>100</default>
+            <summary>Dash background opacity (%)</summary>
+        </key>
+
     </schema>
 
 </schemalist>

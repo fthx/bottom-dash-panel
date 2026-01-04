@@ -31,5 +31,19 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         });
         group.add(dashScaleFactor);
         window._settings.bind('dash-scale-factor', dashScaleFactor, 'value', Gio.SettingsBindFlags.DEFAULT);
+
+        const adjustmentDashBackgroundOpacity = new Gtk.Adjustment({
+            lower: 0,
+            upper: 100,
+            step_increment: 5,
+        });
+
+        const dashBackgroundOpacity = new Adw.SpinRow({
+            title: 'Dash background opacity (%)',
+            subtitle: '100% is the dash natural opacity (opaque).',
+            adjustment: adjustmentDashBackgroundOpacity,
+        });
+        group.add(dashBackgroundOpacity);
+        window._settings.bind('dash-background-opacity', dashBackgroundOpacity, 'value', Gio.SettingsBindFlags.DEFAULT);
     }
 }
