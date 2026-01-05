@@ -23,6 +23,8 @@ const BottomDashPanel = GObject.registerClass(
             this._dashHeightRatio = this._settings?.get_double('dash-height') ?? 4.4;
 
             this._initDash();
+
+            Main.layoutManager.connectObject('monitors-changed', () => this._setDash(), this);
         }
 
         _initDash() {
@@ -84,6 +86,7 @@ const BottomDashPanel = GObject.registerClass(
                 this._dashTimeout = null;
             }
 
+            Main.layoutManager.disconnectObject(this);
             this._dash.disconnectObject(this);
             this._dash.showAppsButton.disconnectObject(this);
 
@@ -121,8 +124,6 @@ export default class BottomDashPanelExtension extends Extension {
             this._initTimeout = null;
             return GLib.SOURCE_REMOVE;
         });
-
-        Main.layoutManager.connectObject('monitors-changed', () => this._restart(), this);
     }
 
     _restart() {
