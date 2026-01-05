@@ -18,6 +18,22 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         const group = new Adw.PreferencesGroup();
         page.add(group);
 
+        const adjustmentDashHeight = new Gtk.Adjustment({
+            lower: 1,
+            upper: 15,
+            step_increment: 0.1,
+            page_increment: 1.0,
+        });
+
+        const dashHeight = new Adw.SpinRow({
+            title: 'Dash max height (% of monitor height)',
+            subtitle: 'GNOME dash has fixed icon sizes: actual dash height can be less than this maximum.',
+            adjustment: adjustmentDashHeight,
+            digits: 1,
+        });
+        group.add(dashHeight);
+        window._settings.bind('dash-height', dashHeight, 'value', Gio.SettingsBindFlags.DEFAULT);
+
         const adjustmentDashBackgroundOpacity = new Gtk.Adjustment({
             lower: 0,
             upper: 100,

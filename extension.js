@@ -19,6 +19,8 @@ const BottomDashPanel = GObject.registerClass(
             super._init();
 
             this._settings = settings;
+            this._dashBackgroundOpacityRatio = this._settings?.get_int('dash-background-opacity') ?? 100;
+            this._dashHeightRatio = this._settings?.get_double('dash-height') ?? 4.4;
 
             this._initDash();
         }
@@ -29,7 +31,7 @@ const BottomDashPanel = GObject.registerClass(
             this._dash.reactive = true;
             this._dash._background.reactive = true;
 
-            this._dash._background.opacity = (this._settings?.get_int('dash-background-opacity') ?? 100) / 100 * 255;
+            this._dash._background.opacity = (this._dashBackgroundOpacityRatio) / 100 * 255;
 
             this._dash.set_pivot_point(0.5, 1.0);
             this._dash._background.set_pivot_point(0.5, 1.0);
@@ -52,7 +54,7 @@ const BottomDashPanel = GObject.registerClass(
 
         _onShowAppsButtonClicked() {
             if (Main.overview.visible)
-                Main.overview._overview._controls._onShowAppsButtonToggled();
+                Main.overview._overview._controls._toggleAppsPage();
             else
                 Main.overview.showApps();
         }
@@ -65,9 +67,10 @@ const BottomDashPanel = GObject.registerClass(
                 const monitor = Main.layoutManager.primaryMonitor;
                 if (monitor) {
                     const { width: width, height: height, x, y } = monitor;
+                    const dashHeight = Math.round(this._dashHeightRatio / 100 * height);
                     this._dash._background.width = width;
                     this._dash.set_position(x, y + height - this._dash.height);
-                    this._dash.setMaxSize(width, 42);
+                    this._dash.setMaxSize(width, dashHeight);
                 }
 
                 this._dashTimeout = null;
@@ -98,8 +101,6 @@ const BottomDashPanel = GObject.registerClass(
                 Main.layoutManager.removeChrome(this._dash);
 
             Main.layoutManager.uiGroup.remove_style_class_name('bottom-dash-panel');
-
-            ////////////////////////////////////Main.overview.show();
         }
     });
 
