@@ -25,6 +25,20 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         group1.add(multiMonitor);
         window._settings.bind('multi-monitor', multiMonitor, 'active', Gio.SettingsBindFlags.DEFAULT);
 
+        const togglePanel = new Adw.SwitchRow({
+            title: 'Bottom pressure to toggle bottom panel',
+            subtitle: 'Dock mode or simply bottom panel toggle.',
+        });
+        group1.add(togglePanel);
+        window._settings.bind('toggle-panel', togglePanel, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+        const overlapWindows = new Adw.SwitchRow({
+            title: 'Bottom panel overlaps windows',
+            subtitle: 'Classical dock behaviour but there is no autohide here.',
+        });
+        group1.add(overlapWindows);
+        window._settings.bind('overlap-windows', overlapWindows, 'active', Gio.SettingsBindFlags.DEFAULT);
+
         const hideTopPanel = new Adw.SwitchRow({
             title: 'Hide top panel',
             subtitle: 'Top panel appears only in overview.',

@@ -9,6 +9,16 @@
             <summary>Dash panel on all monitors</summary>
         </key>
 
+        <key type="b" name="toggle-panel">
+            <default>true</default>
+            <summary>Bottom pressure to toggle bottom panel</summary>
+        </key>
+
+        <key type="b" name="overlap-windows">
+            <default>false</default>
+            <summary>Bottom panel overlaps windows</summary>
+        </key>
+
         <key type="b" name="hide-top-panel">
             <default>false</default>
             <summary>Hide top panel</summary>
