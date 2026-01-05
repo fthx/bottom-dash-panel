@@ -27,7 +27,7 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
 
         const dashHeight = new Adw.SpinRow({
             title: 'Dash max height (% of monitor height)',
-            subtitle: 'GNOME dash has fixed icon sizes: actual dash height can be less than this maximum.',
+            subtitle: 'GNOME dash has fixed icon sizes (16, 22, 24, 32, 48, 64).\nActual dash height can be less than this maximum.',
             adjustment: adjustmentDashHeight,
             digits: 1,
         });
@@ -42,7 +42,7 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
 
         const dashBackgroundOpacity = new Adw.SpinRow({
             title: 'Dash background opacity (%)',
-            subtitle: '100% is the dash natural opacity (opaque).',
+            subtitle: '100% is GNOME dash natural opacity (opaque).',
             adjustment: adjustmentDashBackgroundOpacity,
         });
         group.add(dashBackgroundOpacity);

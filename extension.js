@@ -13,6 +13,24 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 
+const BottomDash = GObject.registerClass(
+    class BottomDash extends Dash.Dash {
+        _init() {
+            super._init();
+        }
+
+        _queueRedisplay() {
+            if (this._workId)
+                Main.queueDeferredWork(this._workId);
+        }
+
+        destroy() {
+            this._workId = null;
+
+            super.destroy();
+        }
+    });
+
 const BottomDashPanel = GObject.registerClass(
     class BottomDashPanel extends GObject.Object {
         _init(settings) {
@@ -22,36 +40,53 @@ const BottomDashPanel = GObject.registerClass(
             this._dashBackgroundOpacityRatio = this._settings?.get_int('dash-background-opacity') ?? 100;
             this._dashHeightRatio = this._settings?.get_double('dash-height') ?? 4.4;
 
-            this._initDash();
-
-            Main.layoutManager.connectObject('monitors-changed', () => this._setDash(), this);
+            this._dashList = [];
+            this._dashTimeoutList = [];
+            const monitors = Main.layoutManager.monitors;
+            monitors?.forEach(monitor => this._initDash(monitor));
+            //this._initDash(Main.layoutManager.primaryMonitor);
         }
 
-        _initDash() {
-            this._dash = new Dash.Dash();
+        _initDash(monitor) {
+            const dash = new BottomDash();
+            this._dashList.push(dash);
 
-            this._dash.reactive = true;
-            this._dash._background.reactive = true;
+            dash.reactive = true;
+            dash._background.reactive = true;
+            dash._background.opacity = (this._dashBackgroundOpacityRatio) / 100 * 255;
 
-            this._dash._background.opacity = (this._dashBackgroundOpacityRatio) / 100 * 255;
+            dash.set_pivot_point(0.5, 1.0);
+            dash._background.set_pivot_point(0.5, 1.0);
 
-            this._dash.set_pivot_point(0.5, 1.0);
-            this._dash._background.set_pivot_point(0.5, 1.0);
-
-            Main.overview.dash.hide();
-            Main.layoutManager.addTopChrome(this._dash, {
+            Main.layoutManager.addTopChrome(dash, {
                 affectsInputRegion: true, affectsStruts: true, trackFullscreen: true,
             });
 
-            Main.layoutManager.uiGroup.add_style_class_name('bottom-dash-panel');
-
-            this._dash.connectObject(
-                'icon-size-changed', () => this._setDash(),
+            dash.connectObject(
+                'icon-size-changed', () => this._setDash(monitor, dash),
                 'scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event),
                 this);
-            this._dash.showAppsButton.connectObject('notify::checked', () => this._onShowAppsButtonClicked(), this);
+            dash.showAppsButton.connectObject('notify::checked', () => this._onShowAppsButtonClicked(), this);
 
-            this._setDash();
+            this._setDash(monitor, dash);
+        }
+
+        _setDash(monitor, dash) {
+            if (Main.overview.visible)
+                return;
+
+            let dashTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                if (monitor) {
+                    const { width: width, height: height, x, y } = monitor;
+                    const dashHeight = Math.round(this._dashHeightRatio / 100 * height);
+                    dash._background.width = width;
+                    dash.set_position(x, y + height - dash.height);
+                    dash.setMaxSize(width, dashHeight);
+                }
+
+                return GLib.SOURCE_REMOVE;
+            });
+            this._dashTimeoutList.push(dashTimeout);
         }
 
         _onShowAppsButtonClicked() {
@@ -61,49 +96,28 @@ const BottomDashPanel = GObject.registerClass(
                 Main.overview.showApps();
         }
 
-        _setDash() {
-            if (this._dashTimeout || Main.overview.visible)
-                return;
-
-            this._dashTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-                const monitor = Main.layoutManager.primaryMonitor;
-                if (monitor) {
-                    const { width: width, height: height, x, y } = monitor;
-                    const dashHeight = Math.round(this._dashHeightRatio / 100 * height);
-                    this._dash._background.width = width;
-                    this._dash.set_position(x, y + height - this._dash.height);
-                    this._dash.setMaxSize(width, dashHeight);
-                }
-
-                this._dashTimeout = null;
-                return GLib.SOURCE_REMOVE;
-            });
-        }
-
         destroy() {
-            if (this._dashTimeout) {
-                GLib.Source.remove(this._dashTimeout);
-                this._dashTimeout = null;
-            }
+            this._dashTimeoutList.forEach(dashTimeout => {
+                if (dashTimeout) {
+                    GLib.Source.remove(dashTimeout);
+                    dashTimeout = null;
+                }
+            });
+            this._dashTimeoutList = null;
 
-            Main.layoutManager.disconnectObject(this);
-            this._dash.disconnectObject(this);
-            this._dash.showAppsButton.disconnectObject(this);
+            this._dashList.forEach(dash => {
+                if (dash) {
+                    dash.showAppsButton.disconnectObject(this);
+                    dash.disconnectObject(this);
 
-            this._dash.reactive = false;
-            this._dash._background.reactive = false;
-            this._dash._background.opacity = 255;
-            this._dash.set_pivot_point(0.0, 0.0);
-            this._dash._background.set_pivot_point(0.0, 0.0);
-            this._dash._background.width = -1;
-            this._dash.set_size(-1, -1);
-            this._dash.set_position(-1, -1);
-            this._dash.setMaxSize(-1, -1);
+                    if (dash.get_parent() === Main.layoutManager.uiGroup)
+                        Main.layoutManager.removeChrome(dash);
 
-            if (this._dash.get_parent() === Main.layoutManager.uiGroup)
-                Main.layoutManager.removeChrome(this._dash);
-
-            Main.layoutManager.uiGroup.remove_style_class_name('bottom-dash-panel');
+                    dash.destroy();
+                    dash = null;
+                }
+            });
+            this._dashList = null;
         }
     });
 
@@ -114,6 +128,9 @@ export default class BottomDashPanelExtension extends Extension {
 
     _initBottomDashPanel() {
         Main.overview.hide();
+        Main.overview.dash.hide();
+
+        Main.layoutManager.uiGroup.add_style_class_name('bottom-dash-panel');
 
         if (this._initTimeout)
             return;
@@ -124,6 +141,8 @@ export default class BottomDashPanelExtension extends Extension {
             this._initTimeout = null;
             return GLib.SOURCE_REMOVE;
         });
+
+        Main.layoutManager.connectObject('monitors-changed', () => this._restart(), this);
     }
 
     _restart() {
@@ -151,6 +170,9 @@ export default class BottomDashPanelExtension extends Extension {
 
         this._bottomDashPanel?.destroy();
         this._bottomDashPanel = null;
+        Main.layoutManager.uiGroup.remove_style_class_name('bottom-dash-panel');
+
+        Main.overview.dash.show();
 
         this._settings?.disconnectObject(this);
         this._settings = null;
