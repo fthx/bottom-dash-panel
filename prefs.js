@@ -15,21 +15,32 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         });
         window.add(page);
 
-        const group = new Adw.PreferencesGroup();
-        page.add(group);
+
+        const group1 = new Adw.PreferencesGroup();
+        page.add(group1);
 
         const multiMonitor = new Adw.SwitchRow({
             title: 'Bottom panel on all monitors',
         });
-        group.add(multiMonitor);
+        group1.add(multiMonitor);
         window._settings.bind('multi-monitor', multiMonitor, 'active', Gio.SettingsBindFlags.DEFAULT);
 
         const hideTopPanel = new Adw.SwitchRow({
             title: 'Hide top panel',
             subtitle: 'Top panel appears only in overview.',
         });
-        group.add(hideTopPanel);
+        group1.add(hideTopPanel);
         window._settings.bind('hide-top-panel', hideTopPanel, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+        const noOverview = new Adw.SwitchRow({
+            title: 'No overview at start-up',
+        });
+        group1.add(noOverview);
+        window._settings.bind('no-overview', noOverview, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+
+        const group2 = new Adw.PreferencesGroup();
+        page.add(group2);
 
         const adjustmentDashHeight = new Gtk.Adjustment({
             lower: 1,
@@ -44,7 +55,7 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
             adjustment: adjustmentDashHeight,
             digits: 1,
         });
-        group.add(dashHeight);
+        group2.add(dashHeight);
         window._settings.bind('dash-height', dashHeight, 'value', Gio.SettingsBindFlags.DEFAULT);
 
         const adjustmentDashBackgroundOpacity = new Gtk.Adjustment({
@@ -58,7 +69,7 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
             subtitle: '100% is GNOME dash natural opacity (opaque).',
             adjustment: adjustmentDashBackgroundOpacity,
         });
-        group.add(dashBackgroundOpacity);
+        group2.add(dashBackgroundOpacity);
         window._settings.bind('dash-background-opacity', dashBackgroundOpacity, 'value', Gio.SettingsBindFlags.DEFAULT);
     }
 }

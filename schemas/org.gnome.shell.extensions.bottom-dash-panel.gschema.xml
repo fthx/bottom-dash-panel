@@ -14,6 +14,11 @@
             <summary>Hide top panel</summary>
         </key>
 
+        <key type="b" name="no-overview">
+            <default>true</default>
+            <summary>No overview at start-up</summary>
+        </key>
+
         <key type="d" name="dash-height">
             <default>4.4</default>
             <range min="1" max="15"/>

@@ -102,7 +102,7 @@ const BottomDashPanel = GObject.registerClass(
                 this._hidePanel();
 
             this._dashList = [];
-            this._dashTimeoutList = [];
+
             const monitors = Main.layoutManager.monitors;
             if (this._settings?.get_boolean('multi-monitor'))
                 monitors?.forEach(monitor => this._initDash(monitor));
@@ -137,10 +137,7 @@ const BottomDashPanel = GObject.registerClass(
         }
 
         destroy() {
-            this._dashList.forEach(dash => {
-                dash?.destroy();
-                dash = null;
-            });
+            this._dashList.forEach(dash => dash?.destroy());
             this._dashList = null;
 
             if (this._settings?.get_boolean('hide-top-panel'))
@@ -154,7 +151,8 @@ export default class BottomDashPanelExtension extends Extension {
     }
 
     _initBottomDashPanel() {
-        Main.overview.hide();
+        if (this._settings?.get_boolean('no-overview'))
+            Main.overview.hide();
         Main.overview.dash.hide();
 
         Main.layoutManager.uiGroup.add_style_class_name('bottom-dash-panel');
