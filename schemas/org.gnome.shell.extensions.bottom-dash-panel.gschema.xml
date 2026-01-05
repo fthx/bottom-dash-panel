@@ -4,6 +4,16 @@
 
     <schema path="/org/gnome/shell/extensions/bottom-dash-panel/" id="org.gnome.shell.extensions.bottom-dash-panel">
 
+        <key type="b" name="multi-monitor">
+            <default>true</default>
+            <summary>Dash panel on all monitors</summary>
+        </key>
+
+        <key type="b" name="hide-top-panel">
+            <default>false</default>
+            <summary>Hide top panel</summary>
+        </key>
+
         <key type="d" name="dash-height">
             <default>4.4</default>
             <range min="1" max="15"/>
@@ -11,7 +21,7 @@
         </key>
 
         <key type="i" name="dash-background-opacity">
-            <default>100</default>
+            <default>90</default>
             <range min="0" max="100"/>
             <summary>Dash background opacity (%)</summary>
         </key>

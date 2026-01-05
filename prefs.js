@@ -18,6 +18,19 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         const group = new Adw.PreferencesGroup();
         page.add(group);
 
+        const multiMonitor = new Adw.SwitchRow({
+            title: 'Bottom panel on all monitors',
+        });
+        group.add(multiMonitor);
+        window._settings.bind('multi-monitor', multiMonitor, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+        const hideTopPanel = new Adw.SwitchRow({
+            title: 'Hide top panel',
+            subtitle: 'Top panel appears only in overview.',
+        });
+        group.add(hideTopPanel);
+        window._settings.bind('hide-top-panel', hideTopPanel, 'active', Gio.SettingsBindFlags.DEFAULT);
+
         const adjustmentDashHeight = new Gtk.Adjustment({
             lower: 1,
             upper: 15,

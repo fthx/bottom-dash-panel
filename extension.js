@@ -15,8 +15,58 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const BottomDash = GObject.registerClass(
     class BottomDash extends Dash.Dash {
-        _init() {
+        _init(settings, monitor) {
             super._init();
+
+            this._settings = settings;
+            this._monitor = monitor;
+
+            this._dashBackgroundOpacityRatio = this._settings?.get_int('dash-background-opacity') ?? 100;
+            this._dashHeightRatio = this._settings?.get_double('dash-height') ?? 4.4;
+
+            this.reactive = true;
+            this._background.reactive = true;
+            this._background.opacity = (this._dashBackgroundOpacityRatio) / 100 * 255;
+
+            this.set_pivot_point(0.5, 1.0);
+            this._background.set_pivot_point(0.5, 1.0);
+
+            Main.layoutManager.addTopChrome(this, {
+                affectsInputRegion: true, affectsStruts: true, trackFullscreen: true,
+            });
+
+            this._setGeometry();
+
+            this.connectObject(
+                'scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event),
+                'icon-size-changed', () => this._setGeometry(),
+                this);
+            this.showAppsButton.connectObject('notify::checked', () => this._onShowAppsButtonClicked(), this);
+        }
+
+        _setGeometry() {
+            if (Main.overview.visible)
+                return;
+
+            this._setGeometryTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                if (this._monitor) {
+                    const { width: width, height: height, x, y } = this._monitor;
+                    const dashHeight = Math.round(this._dashHeightRatio / 100 * height);
+                    this._background.width = width;
+                    this.set_position(x, y + height - this.height);
+                    this.setMaxSize(width, dashHeight);
+                }
+
+                this._setGeometryTimeout = null;
+                return GLib.SOURCE_REMOVE;
+            });
+        }
+
+        _onShowAppsButtonClicked() {
+            if (Main.overview.visible)
+                Main.overview._overview._controls._toggleAppsPage();
+            else
+                Main.overview.showApps();
         }
 
         _queueRedisplay() {
@@ -25,6 +75,16 @@ const BottomDash = GObject.registerClass(
         }
 
         destroy() {
+            if (this._setGeometryTimeout) {
+                GLib.Source.remove(this._setGeometryTimeout);
+                this._setGeometryTimeout = null;
+            }
+
+            this.showAppsButton.disconnectObject(this);
+
+            if (this.get_parent() === Main.layoutManager.uiGroup)
+                Main.layoutManager.removeChrome(this);
+
             this._workId = null;
 
             super.destroy();
@@ -37,87 +97,54 @@ const BottomDashPanel = GObject.registerClass(
             super._init();
 
             this._settings = settings;
-            this._dashBackgroundOpacityRatio = this._settings?.get_int('dash-background-opacity') ?? 100;
-            this._dashHeightRatio = this._settings?.get_double('dash-height') ?? 4.4;
+
+            if (this._settings?.get_boolean('hide-top-panel'))
+                this._hidePanel();
 
             this._dashList = [];
             this._dashTimeoutList = [];
             const monitors = Main.layoutManager.monitors;
-            monitors?.forEach(monitor => this._initDash(monitor));
-            //this._initDash(Main.layoutManager.primaryMonitor);
+            if (this._settings?.get_boolean('multi-monitor'))
+                monitors?.forEach(monitor => this._initDash(monitor));
+            else
+                this._initDash(Main.layoutManager.primaryMonitor);
         }
 
         _initDash(monitor) {
-            const dash = new BottomDash();
-            this._dashList.push(dash);
-
-            dash.reactive = true;
-            dash._background.reactive = true;
-            dash._background.opacity = (this._dashBackgroundOpacityRatio) / 100 * 255;
-
-            dash.set_pivot_point(0.5, 1.0);
-            dash._background.set_pivot_point(0.5, 1.0);
-
-            Main.layoutManager.addTopChrome(dash, {
-                affectsInputRegion: true, affectsStruts: true, trackFullscreen: true,
-            });
-
-            dash.connectObject(
-                'icon-size-changed', () => this._setDash(monitor, dash),
-                'scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event),
-                this);
-            dash.showAppsButton.connectObject('notify::checked', () => this._onShowAppsButtonClicked(), this);
-
-            this._setDash(monitor, dash);
-        }
-
-        _setDash(monitor, dash) {
-            if (Main.overview.visible)
+            if (!monitor)
                 return;
 
-            let dashTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-                if (monitor) {
-                    const { width: width, height: height, x, y } = monitor;
-                    const dashHeight = Math.round(this._dashHeightRatio / 100 * height);
-                    dash._background.width = width;
-                    dash.set_position(x, y + height - dash.height);
-                    dash.setMaxSize(width, dashHeight);
-                }
-
-                return GLib.SOURCE_REMOVE;
-            });
-            this._dashTimeoutList.push(dashTimeout);
+            const dash = new BottomDash(this._settings, monitor);
+            this._dashList.push(dash);
         }
 
-        _onShowAppsButtonClicked() {
-            if (Main.overview.visible)
-                Main.overview._overview._controls._toggleAppsPage();
-            else
-                Main.overview.showApps();
+        _showPanel() {
+            if (Main.layoutManager.overviewGroup.get_children().includes(Main.layoutManager.panelBox))
+                Main.layoutManager.overviewGroup.remove_child(Main.layoutManager.panelBox);
+            if (Main.layoutManager.panelBox.get_parent() !== Main.layoutManager.uiGroup)
+                Main.layoutManager.addChrome(Main.layoutManager.panelBox, { affectsStruts: true, trackFullscreen: false });
+
+            Main.overview.searchEntry.get_parent().set_style('margin-top: 0px;');
+        }
+
+        _hidePanel() {
+            if (Main.layoutManager.panelBox.get_parent() === Main.layoutManager.uiGroup)
+                Main.layoutManager.removeChrome(Main.layoutManager.panelBox);
+            if (!Main.layoutManager.overviewGroup.get_children().includes(Main.layoutManager.panelBox))
+                Main.layoutManager.overviewGroup.insert_child_at_index(Main.layoutManager.panelBox, 0);
+
+            Main.overview.searchEntry.get_parent().set_style('margin-top: 32px;');
         }
 
         destroy() {
-            this._dashTimeoutList.forEach(dashTimeout => {
-                if (dashTimeout) {
-                    GLib.Source.remove(dashTimeout);
-                    dashTimeout = null;
-                }
-            });
-            this._dashTimeoutList = null;
-
             this._dashList.forEach(dash => {
-                if (dash) {
-                    dash.showAppsButton.disconnectObject(this);
-                    dash.disconnectObject(this);
-
-                    if (dash.get_parent() === Main.layoutManager.uiGroup)
-                        Main.layoutManager.removeChrome(dash);
-
-                    dash.destroy();
-                    dash = null;
-                }
+                dash?.destroy();
+                dash = null;
             });
             this._dashList = null;
+
+            if (this._settings?.get_boolean('hide-top-panel'))
+                this._showPanel();
         }
     });
 
