@@ -7,6 +7,7 @@
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 
+import * as Dash from 'resource:///org/gnome/shell/ui/dash.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
@@ -23,7 +24,7 @@ const BottomDashPanel = GObject.registerClass(
         }
 
         _initDash() {
-            this._dash = Main.overview.dash;
+            this._dash = new Dash.Dash();
 
             this._dash.reactive = true;
             this._dash._background.reactive = true;
@@ -33,12 +34,10 @@ const BottomDashPanel = GObject.registerClass(
             this._dash.set_pivot_point(0.5, 1.0);
             this._dash._background.set_pivot_point(0.5, 1.0);
 
-            if (Main.overview._overview._controls.get_children().includes(this._dash)) {
-                Main.overview._overview._controls.remove_child(this._dash);
-                Main.layoutManager.addTopChrome(this._dash, {
-                    affectsInputRegion: true, affectsStruts: true, trackFullscreen: true,
-                });
-            }
+            Main.overview.dash.hide();
+            Main.layoutManager.addTopChrome(this._dash, {
+                affectsInputRegion: true, affectsStruts: true, trackFullscreen: true,
+            });
 
             Main.layoutManager.uiGroup.add_style_class_name('bottom-dash-panel');
 
@@ -52,12 +51,14 @@ const BottomDashPanel = GObject.registerClass(
         }
 
         _onShowAppsButtonClicked() {
-            if (!Main.overview.visible)
+            if (Main.overview.visible)
+                Main.overview._overview._controls._onShowAppsButtonToggled();
+            else
                 Main.overview.showApps();
         }
 
         _setDash() {
-            if (this._dashTimeout)
+            if (this._dashTimeout || Main.overview.visible)
                 return;
 
             this._dashTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
@@ -66,7 +67,7 @@ const BottomDashPanel = GObject.registerClass(
                     const { width: width, height: height, x, y } = monitor;
                     this._dash._background.width = width;
                     this._dash.set_position(x, y + height - this._dash.height);
-                    //this._dash.setMaxSize(width, 48);
+                    this._dash.setMaxSize(width, 42);
                 }
 
                 this._dashTimeout = null;
@@ -93,14 +94,12 @@ const BottomDashPanel = GObject.registerClass(
             this._dash.set_position(-1, -1);
             this._dash.setMaxSize(-1, -1);
 
-            if (this._dash.get_parent() === Main.layoutManager.uiGroup) {
+            if (this._dash.get_parent() === Main.layoutManager.uiGroup)
                 Main.layoutManager.removeChrome(this._dash);
-                Main.overview._overview._controls.add_child(this._dash);
-            }
 
             Main.layoutManager.uiGroup.remove_style_class_name('bottom-dash-panel');
 
-            Main.overview.show();
+            ////////////////////////////////////Main.overview.show();
         }
     });
 
