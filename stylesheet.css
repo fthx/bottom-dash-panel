@@ -24,3 +24,7 @@
     padding-top: 0;
     padding-bottom: 0;
 }
+
+.bottom-dash-panel .overview-icon {
+    background-color: transparent;
+}
