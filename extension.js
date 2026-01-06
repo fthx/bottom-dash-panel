@@ -200,7 +200,7 @@ const BottomDash = GObject.registerClass(
         }
 
         _onHover() {
-            if (this._autoHide && !this.get_hover() && !this._keepDashShown)
+            if (this._autoHide && !this.get_hover() && !this._keepDashShown && !Main.overview.visible)
                 this._hide();
         }
 
