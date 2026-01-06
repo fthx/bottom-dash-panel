@@ -105,6 +105,8 @@ const BottomDash = GObject.registerClass(
             this.track_hover = true;
             this._background.reactive = true;
             this._background.opacity = (this._settings?.get_int('dash-background-opacity') ?? 100) / 100 * 255;
+            if (this._settings?.get_boolean('accent-color'))
+                this._background.add_style_class_name('bottom-dash-panel-accent-color');
 
             this.set_pivot_point(0.5, 1.0);
             this._background.set_pivot_point(0.5, 1.0);

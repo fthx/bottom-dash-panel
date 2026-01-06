@@ -93,6 +93,12 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         group2.add(dashBackgroundOpacity);
         window._settings.bind('dash-background-opacity', dashBackgroundOpacity, 'value', Gio.SettingsBindFlags.DEFAULT);
 
+        const accentColor = new Adw.SwitchRow({
+            title: 'Dash background uses accent color',
+        });
+        group2.add(accentColor);
+        window._settings.bind('accent-color', accentColor, 'active', Gio.SettingsBindFlags.DEFAULT);
+
         const adjustmentAnimationTime = new Gtk.Adjustment({
             lower: 0,
             upper: 500,

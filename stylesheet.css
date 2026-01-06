@@ -10,6 +10,10 @@
     padding-bottom: 4px;
 }
 
+.bottom-dash-panel-accent-color {
+    background-color: st-mix(-st-accent-color, black, 30%)
+}
+
 .bottom-dash-panel .dash-item-container .overview-tile .app-grid-running-dot {
     margin-bottom: 0;
     offset-y: -2px;

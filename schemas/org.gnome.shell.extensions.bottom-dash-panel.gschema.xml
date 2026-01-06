@@ -46,6 +46,11 @@
             <summary>Dash background opacity (%)</summary>
         </key>
 
+        <key type="b" name="accent-color">
+            <default>false</default>
+            <summary>Dash background uses accent color</summary>
+        </key>
+
         <key type="i" name="animation-time">
             <default>150</default>
             <range min="0" max="500"/>
