@@ -317,8 +317,7 @@ const BottomDashPanel = GObject.registerClass(
             this._dashList.forEach(dash => dash?.destroy());
             this._dashList = null;
 
-            if (this._settings?.get_boolean('hide-top-panel'))
-                this._showTopPanel();
+            this._showTopPanel();
         }
     });
 
