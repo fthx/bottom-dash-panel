@@ -6,7 +6,7 @@
 
         <key type="b" name="multi-monitor">
             <default>true</default>
-            <summary>Dash panel on all monitors</summary>
+            <summary>Bottom panel on all monitors</summary>
         </key>
 
         <key type="b" name="toggle-panel">
@@ -15,8 +15,13 @@
         </key>
 
         <key type="b" name="overlap-windows">
-            <default>false</default>
+            <default>true</default>
             <summary>Bottom panel overlaps windows</summary>
+        </key>
+
+        <key type="b" name="auto-hide">
+            <default>true</default>
+            <summary>Auto hide bottom panel</summary>
         </key>
 
         <key type="b" name="hide-top-panel">
@@ -39,6 +44,12 @@
             <default>90</default>
             <range min="0" max="100"/>
             <summary>Dash background opacity (%)</summary>
+        </key>
+
+        <key type="i" name="animation-time">
+            <default>150</default>
+            <range min="0" max="500"/>
+            <summary>Dash hide/show animation time (ms)</summary>
         </key>
 
     </schema>

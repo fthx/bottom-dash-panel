@@ -34,10 +34,17 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
 
         const overlapWindows = new Adw.SwitchRow({
             title: 'Bottom panel overlaps windows',
-            subtitle: 'Classical dock behaviour but there is no autohide here.',
+            subtitle: 'Classical dock behaviour.',
         });
         group1.add(overlapWindows);
         window._settings.bind('overlap-windows', overlapWindows, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+        const autoHide = new Adw.SwitchRow({
+            title: 'Auto hide bottom panel',
+            subtitle: 'There is no intellihide here.',
+        });
+        group1.add(autoHide);
+        window._settings.bind('auto-hide', autoHide, 'active', Gio.SettingsBindFlags.DEFAULT);
 
         const hideTopPanel = new Adw.SwitchRow({
             title: 'Hide top panel',
@@ -85,5 +92,18 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         });
         group2.add(dashBackgroundOpacity);
         window._settings.bind('dash-background-opacity', dashBackgroundOpacity, 'value', Gio.SettingsBindFlags.DEFAULT);
+
+        const adjustmentAnimationTime = new Gtk.Adjustment({
+            lower: 0,
+            upper: 500,
+            step_increment: 50,
+        });
+
+        const animationTime = new Adw.SpinRow({
+            title: 'Dash hide/show animation time (ms)',
+            adjustment: adjustmentAnimationTime,
+        });
+        group2.add(animationTime);
+        window._settings.bind('animation-time', animationTime, 'value', Gio.SettingsBindFlags.DEFAULT);
     }
 }

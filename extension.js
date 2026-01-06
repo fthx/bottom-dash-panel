@@ -100,8 +100,11 @@ const BottomDash = GObject.registerClass(
 
             this._dashBackgroundOpacityRatio = this._settings?.get_int('dash-background-opacity') ?? 100;
             this._dashHeightRatio = this._settings?.get_double('dash-height') ?? 4.4;
+            this._animationTime = this._settings?.get_int('animation-time') ?? 200;
+            this._autoHide = this._settings?.get_boolean('auto-hide');
 
             this.reactive = true;
+            this.track_hover = true;
             this._background.reactive = true;
             this._background.opacity = (this._dashBackgroundOpacityRatio) / 100 * 255;
 
@@ -121,10 +124,17 @@ const BottomDash = GObject.registerClass(
             this._setGeometry();
 
             this.connectObject(
-                'scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event),
                 'icon-size-changed', () => this._setGeometry(),
+                'notify::hover', () => this._onHover(),
+                'scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event),
                 this);
             this.showAppsButton.connectObject('notify::checked', () => this._onShowAppsButtonClicked(), this);
+
+            if (this._autoHide)
+                Main.overview.connectObject(
+                    'showing', () => this._show(),
+                    'hiding', () => this._hide(),
+                    this);
         }
 
         _setGeometry() {
@@ -155,7 +165,7 @@ const BottomDash = GObject.registerClass(
 
             this.show();
             this.ease({
-                duration: 200,
+                duration: this._animationTime,
                 scale_y: 1,
                 opacity: 255,
                 mode: Clutter.AnimationMode.EASE_IN_QUAD,
@@ -166,7 +176,7 @@ const BottomDash = GObject.registerClass(
             this.remove_all_transitions();
 
             this.ease({
-                duration: 200,
+                duration: this._animationTime,
                 scale_y: 0,
                 opacity: 0,
                 mode: Clutter.AnimationMode.EASE_OUT_QUAD,
@@ -177,11 +187,10 @@ const BottomDash = GObject.registerClass(
         }
 
         _toggle() {
-            if (this.visible) {
+            if (this.visible)
                 this._hide();
-            } else {
+            else
                 this._show();
-            }
         }
 
         _onShowAppsButtonClicked() {
@@ -189,6 +198,27 @@ const BottomDash = GObject.registerClass(
                 Main.overview._overview._controls._toggleAppsPage();
             else
                 Main.overview.showApps();
+        }
+
+        _onHover() {
+            if (this._autoHide && !this.get_hover() && !this._keepDashShown)
+                this._hide();
+        }
+
+        _itemMenuStateChanged(item, opened) {
+            if (opened) {
+                if (this._showLabelTimeoutId > 0) {
+                    GLib.source_remove(this._showLabelTimeoutId);
+                    this._showLabelTimeoutId = 0;
+                }
+
+                item.hideLabel();
+
+                this._keepDashShown = true;
+            } else
+                this._keepDashShown = false;
+
+            this._onHover();
         }
 
         _queueRedisplay() {
@@ -209,6 +239,8 @@ const BottomDash = GObject.registerClass(
             this._bottomEdge?.destroy();
 
             this.showAppsButton.disconnectObject(this);
+            if (this._autoHide)
+                Main.overview.disconnectObject(this);
 
             if (this.get_parent() === Main.layoutManager.uiGroup)
                 Main.layoutManager.removeChrome(this);
