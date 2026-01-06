@@ -11,7 +11,7 @@
 }
 
 .bottom-dash-panel-accent-color {
-    background-color: st-mix(-st-accent-color, black, 30%)
+    background-color: st-mix(-st-accent-color, black, 30%);
 }
 
 .bottom-dash-panel .dash-item-container .overview-tile .app-grid-running-dot {
