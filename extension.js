@@ -30,11 +30,10 @@ const BottomEdge = GObject.registerClass(
         }
 
         _initPressureBarrier() {
-            const PRESSURE_THRESHOLD = 150; // px
             const EDGE_PRESSURE_TIMEOUT = 1000; // ms
 
             this._pressureBarrier = new Layout.PressureBarrier(
-                PRESSURE_THRESHOLD,
+                this._settings?.get_int('bottom-pressure') ?? 150,
                 EDGE_PRESSURE_TIMEOUT,
                 Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW);
         }

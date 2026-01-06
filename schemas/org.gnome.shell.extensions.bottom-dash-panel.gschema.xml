@@ -52,6 +52,12 @@
             <summary>Dash hide/show animation time (ms)</summary>
         </key>
 
+        <key type="i" name="bottom-pressure">
+            <default>150</default>
+            <range min="0" max="500"/>
+            <summary>Bottom edge pressure (px)</summary>
+        </key>
+
     </schema>
 
 </schemalist>

@@ -105,5 +105,19 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         });
         group2.add(animationTime);
         window._settings.bind('animation-time', animationTime, 'value', Gio.SettingsBindFlags.DEFAULT);
+
+        const adjustmentBottomPressure = new Gtk.Adjustment({
+            lower: 0,
+            upper: 500,
+            step_increment: 50,
+        });
+
+        const bottomPressure = new Adw.SpinRow({
+            title: 'Bottom edge pressure (px)',
+            subtitle: '0 means no pressure.',
+            adjustment: adjustmentBottomPressure,
+        });
+        group2.add(bottomPressure);
+        window._settings.bind('bottom-pressure', bottomPressure, 'value', Gio.SettingsBindFlags.DEFAULT);
     }
 }
