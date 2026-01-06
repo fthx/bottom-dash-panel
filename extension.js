@@ -97,7 +97,6 @@ const BottomDash = GObject.registerClass(
             this._settings = settings;
             this._monitor = monitor;
 
-            this._dashBackgroundOpacityRatio = this._settings?.get_int('dash-background-opacity') ?? 100;
             this._dashHeightRatio = this._settings?.get_double('dash-height') ?? 4.4;
             this._animationTime = this._settings?.get_int('animation-time') ?? 200;
             this._autoHide = this._settings?.get_boolean('auto-hide');
@@ -105,7 +104,7 @@ const BottomDash = GObject.registerClass(
             this.reactive = true;
             this.track_hover = true;
             this._background.reactive = true;
-            this._background.opacity = (this._dashBackgroundOpacityRatio) / 100 * 255;
+            this._background.opacity = (this._settings?.get_int('dash-background-opacity') ?? 100) / 100 * 255;
 
             this.set_pivot_point(0.5, 1.0);
             this._background.set_pivot_point(0.5, 1.0);
@@ -120,6 +119,8 @@ const BottomDash = GObject.registerClass(
                     affectsInputRegion: true, affectsStruts: true, trackFullscreen: true,
                 });
 
+            if (this._settings?.get_boolean('toggle-panel'))
+                this._setBottomEdge();
             this._setGeometry();
 
             this.connectObject(
@@ -136,9 +137,26 @@ const BottomDash = GObject.registerClass(
                     this);
         }
 
+        _setBottomEdge() {
+            this._setBottomEdgeTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                if (this._monitor) {
+                    this._bottomEdge = new BottomEdge(this._settings, this._monitor);
+                    this._bottomEdge._pressureBarrier?.connectObject('trigger', () => this._toggle(), this);
+                }
+
+                this._setBottomEdgeTimeout = null;
+                return GLib.SOURCE_REMOVE;
+            });
+        }
+
         _setGeometry() {
             if (Main.overview.visible)
                 return;
+
+            if (this._setGeometryTimeout) {
+                GLib.Source.remove(this._setGeometryTimeout);
+                this._setGeometryTimeout = null;
+            }
 
             this._setGeometryTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                 if (this._monitor) {
@@ -147,11 +165,6 @@ const BottomDash = GObject.registerClass(
                     this._background.width = width;
                     this.set_position(x, y + height - this.height);
                     this.setMaxSize(width, dashHeight);
-
-                    if (this._settings?.get_boolean('toggle-panel')) {
-                        this._bottomEdge = new BottomEdge(this._settings, this._monitor);
-                        this._bottomEdge._pressureBarrier?.connectObject('trigger', () => this._toggle(), this);
-                    }
                 }
 
                 this._setGeometryTimeout = null;
@@ -186,7 +199,7 @@ const BottomDash = GObject.registerClass(
         }
 
         _toggle() {
-            if (this.visible)
+            if (this.visible && !(Main.overview.visible && this._autoHide))
                 this._hide();
             else
                 this._show();
@@ -226,6 +239,11 @@ const BottomDash = GObject.registerClass(
         }
 
         destroy() {
+            if (this._setBottomEdgeTimeout) {
+                GLib.Source.remove(this._setBottomEdgeTimeout);
+                this._setBottomEdgeTimeout = null;
+            }
+
             if (this._setGeometryTimeout) {
                 GLib.Source.remove(this._setGeometryTimeout);
                 this._setGeometryTimeout = null;
