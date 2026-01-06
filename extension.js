@@ -109,9 +109,6 @@ const BottomDash = GObject.registerClass(
             this.set_pivot_point(0.5, 1.0);
             this._background.set_pivot_point(0.5, 1.0);
 
-            if (this._settings?.get_boolean('toggle-panel') && this._settings?.get_boolean('hide-top-panel'))
-                global.compositor.disable_unredirect();
-
             if (this._settings?.get_boolean('overlap-windows'))
                 Main.layoutManager.addTopChrome(this);
             else
@@ -249,9 +246,6 @@ const BottomDash = GObject.registerClass(
                 this._setGeometryTimeout = null;
             }
 
-            if (this._settings?.get_boolean('toggle-panel') && this._settings?.get_boolean('hide-top-panel'))
-                global.compositor.enable_unredirect();
-
             this._bottomEdge?._pressureBarrier?.disconnectObject(this);
             this._bottomEdge?.destroy();
 
@@ -277,6 +271,9 @@ const BottomDashPanel = GObject.registerClass(
 
             if (this._settings?.get_boolean('hide-top-panel'))
                 this._hideTopPanel();
+
+            if (this._settings?.get_boolean('overlap-windows') && this._settings?.get_boolean('hide-top-panel'))
+                global.compositor.disable_unredirect();
 
             this._dashList = [];
 
@@ -314,6 +311,8 @@ const BottomDashPanel = GObject.registerClass(
         }
 
         destroy() {
+            global.compositor.enable_unredirect();
+
             this._dashList.forEach(dash => dash?.destroy());
             this._dashList = null;
 
