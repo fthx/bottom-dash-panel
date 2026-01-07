@@ -27,6 +27,8 @@ const BottomEdge = GObject.registerClass(
 
             this._initPressureBarrier();
             this._setBarrier();
+
+            Main.layoutManager.connectObject('monitors-changed', () => this._setBarrier(), this);
         }
 
         _initPressureBarrier() {
@@ -39,23 +41,29 @@ const BottomEdge = GObject.registerClass(
         }
 
         _setBarrier() {
+            if (!this._monitor)
+                return;
+
+            if (this._barrier)
+                this._removeBarrier();
+
             this._barrierTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                 const monitors = Main.layoutManager.monitors;
                 const { width: width, height: height, x, y } = this._monitor;
 
-                let hasBottom = true;
+                let monitorHasBottom = true;
 
                 for (const otherMonitor of monitors) {
-                    if (otherMonitor === this._monitor)
+                    if (!otherMonitor || otherMonitor === this._monitor)
                         continue;
 
                     if (otherMonitor.y >= y + height
                         && otherMonitor.x < x + width
                         && otherMonitor.x + otherMonitor.width > x)
-                        hasBottom = false;
+                        monitorHasBottom = false;
                 }
 
-                if (hasBottom) {
+                if (monitorHasBottom) {
                     this._barrier = new Meta.Barrier({
                         backend: global.backend,
                         x1: x,
@@ -65,7 +73,7 @@ const BottomEdge = GObject.registerClass(
                         directions: Meta.BarrierDirection.NEGATIVE_Y
                     });
 
-                    this._pressureBarrier?.addBarrier(this._barrier);
+                    this._pressureBarrier.addBarrier(this._barrier);
                 }
 
                 this._barrierTimeout = null;
@@ -73,16 +81,23 @@ const BottomEdge = GObject.registerClass(
             });
         }
 
-        destroy() {
+        _removeBarrier() {
             if (this._barrierTimeout) {
                 GLib.Source.remove(this._barrierTimeout);
                 this._barrierTimeout = null;
             }
 
-            this._barrier?.destroy();
+            this._pressureBarrier?.removeBarrier(this._barrier);
+            this._barrier.destroy();
             this._barrier = null;
+        }
 
-            this._pressureBarrier?.destroy();
+        destroy() {
+            Main.layoutManager.disconnectObject(this);
+
+            this._removeBarrier();
+
+            this._pressureBarrier.destroy();
             this._pressureBarrier = null;
 
             super.destroy();
