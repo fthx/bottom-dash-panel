@@ -172,20 +172,16 @@ const BottomDash = GObject.registerClass(
             if (Main.overview.visible)
                 return;
 
-            if (this._setGeometryTimeout) {
-                GLib.Source.remove(this._setGeometryTimeout);
-                this._setGeometryTimeout = null;
-            }
-
             this._setGeometryTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                 if (this._monitor) {
                     const { width: width, height: height, x, y } = this._monitor;
                     const dashHeight = Math.round(this._dashHeightRatio / 100 * height);
+
                     if (this._panelMode) {
                         this._background.width = width;
                         this.set_position(x, y + height - this.height);
                     } else
-                        this.set_position(x + (width - this.width) / 2, y + height - this.height);
+                        this.set_position(x + Math.round((width - this.width) / 2), y + height - this.height);
                     this.setMaxSize(width, dashHeight);
                 }
 
