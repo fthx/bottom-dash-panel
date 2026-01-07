@@ -63,6 +63,13 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         const group2 = new Adw.PreferencesGroup();
         page.add(group2);
 
+        const panelMode = new Adw.SwitchRow({
+            title: 'Full-width dash',
+            subtitle: 'Panel mode.',
+        });
+        group2.add(panelMode);
+        window._settings.bind('panel-mode', panelMode, 'active', Gio.SettingsBindFlags.DEFAULT);
+
         const adjustmentDashHeight = new Gtk.Adjustment({
             lower: 1,
             upper: 15,

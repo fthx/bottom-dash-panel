@@ -100,6 +100,7 @@ const BottomDash = GObject.registerClass(
             this._dashHeightRatio = this._settings?.get_double('dash-height') ?? 4.4;
             this._animationTime = this._settings?.get_int('animation-time') ?? 200;
             this._autoHide = this._settings?.get_boolean('auto-hide');
+            this._panelMode = this._settings?.get_boolean('panel-mode');
 
             this.reactive = true;
             this.track_hover = true;
@@ -107,6 +108,10 @@ const BottomDash = GObject.registerClass(
             this._background.opacity = (this._settings?.get_int('dash-background-opacity') ?? 100) / 100 * 255;
             if (this._settings?.get_boolean('accent-color'))
                 this._background.add_style_class_name('bottom-dash-panel-accent-color');
+            if (this._settings?.get_boolean('panel-mode'))
+                this._background.add_style_class_name('bottom-dash-panel-panel-mode');
+            else
+                this._background.add_style_class_name('bottom-dash-panel-dock-mode');
 
             this.set_pivot_point(0.5, 1.0);
             this._background.set_pivot_point(0.5, 1.0);
@@ -123,7 +128,7 @@ const BottomDash = GObject.registerClass(
             this._setGeometry();
 
             this.connectObject(
-                'icon-size-changed', () => this._setGeometry(),
+                'notify::width', () => this._setGeometry(),
                 'notify::hover', () => this._onHover(),
                 'scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event),
                 this);
@@ -161,8 +166,11 @@ const BottomDash = GObject.registerClass(
                 if (this._monitor) {
                     const { width: width, height: height, x, y } = this._monitor;
                     const dashHeight = Math.round(this._dashHeightRatio / 100 * height);
-                    this._background.width = width;
-                    this.set_position(x, y + height - this.height);
+                    if (this._panelMode) {
+                        this._background.width = width;
+                        this.set_position(x, y + height - this.height);
+                    } else
+                        this.set_position(x + (width - this.width) / 2, y + height - this.height);
                     this.setMaxSize(width, dashHeight);
                 }
 
