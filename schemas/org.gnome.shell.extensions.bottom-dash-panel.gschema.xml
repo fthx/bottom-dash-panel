@@ -45,15 +45,19 @@
             <summary>Dash max height (%)</summary>
         </key>
 
-        <key type="i" name="dash-background-opacity">
-            <default>90</default>
-            <range min="0" max="100"/>
-            <summary>Dash background opacity (%)</summary>
-        </key>
-
         <key type="b" name="accent-color">
             <default>false</default>
             <summary>Dash background uses accent color</summary>
+        </key>
+
+        <key name="background-color" type="s">
+            <default>"rgba(0,0,0,1)"</default>
+            <summary>Dash background color</summary>
+        </key>
+
+        <key type="b" name="sync-color">
+            <default>true</default>
+            <summary>Apply dash color to top panel</summary>
         </key>
 
         <key type="i" name="animation-time">

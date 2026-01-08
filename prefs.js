@@ -1,5 +1,6 @@
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
+import Gdk from 'gi://Gdk';
 import Adw from 'gi://Adw';
 
 import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
@@ -86,25 +87,42 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
         group2.add(dashHeight);
         window._settings.bind('dash-height', dashHeight, 'value', Gio.SettingsBindFlags.DEFAULT);
 
-        const adjustmentDashBackgroundOpacity = new Gtk.Adjustment({
-            lower: 0,
-            upper: 100,
-            step_increment: 5,
-        });
-
-        const dashBackgroundOpacity = new Adw.SpinRow({
-            title: 'Dash background opacity (%)',
-            subtitle: '100% is GNOME dash natural opacity (opaque).',
-            adjustment: adjustmentDashBackgroundOpacity,
-        });
-        group2.add(dashBackgroundOpacity);
-        window._settings.bind('dash-background-opacity', dashBackgroundOpacity, 'value', Gio.SettingsBindFlags.DEFAULT);
-
         const accentColor = new Adw.SwitchRow({
             title: 'Dash background uses accent color',
+            subtitle: 'Overrides the next item color.',
         });
         group2.add(accentColor);
         window._settings.bind('accent-color', accentColor, 'active', Gio.SettingsBindFlags.DEFAULT);
+
+        const dashBackgroundColor = new Adw.ActionRow({
+            title: 'Dash background color',
+        });
+        group2.add(dashBackgroundColor);
+
+        const colorButton = new Gtk.ColorButton({
+            valign: Gtk.Align.CENTER,
+            use_alpha: true,
+        });
+
+        const colorString = window._settings.get_string('background-color');
+        const rgba = new Gdk.RGBA();
+        rgba.parse(colorString);
+        colorButton.set_rgba(rgba);
+
+        colorButton.connect('color-set', () => {
+            const newColor = colorButton.get_rgba();
+            const colorString = `rgba(${Math.round(newColor.red * 255)},${Math.round(newColor.green * 255)},${Math.round(newColor.blue * 255)},${newColor.alpha})`;
+            window._settings.set_string('background-color', colorString);
+        });
+
+        dashBackgroundColor.add_suffix(colorButton);
+        dashBackgroundColor.activatable_widget = colorButton;
+
+        const syncColor = new Adw.SwitchRow({
+            title: 'Apply dash color to top panel',
+        });
+        group2.add(syncColor);
+        window._settings.bind('sync-color', syncColor, 'active', Gio.SettingsBindFlags.DEFAULT);
 
         const adjustmentAnimationTime = new Gtk.Adjustment({
             lower: 0,

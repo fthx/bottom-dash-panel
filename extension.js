@@ -118,9 +118,14 @@ const BottomDash = GObject.registerClass(
             this.reactive = true;
             this.track_hover = true;
             this._background.reactive = true;
-            this._background.opacity = (this._settings?.get_int('dash-background-opacity') ?? 100) / 100 * 255;
+
             if (this._settings?.get_boolean('accent-color'))
-                this._background.add_style_class_name('bottom-dash-panel-accent-color');
+                this._background.set_style('background-color: st-mix(-st-accent-color, black, 30%);');
+            else
+                this._background.set_style(`background-color: ${this._settings?.get_string('background-color')};`);
+            if (this._settings?.get_boolean('sync-color'))
+                Main.panel.set_style(this._background.get_style());
+
             if (this._settings?.get_boolean('panel-mode'))
                 this._background.add_style_class_name('bottom-dash-panel-panel-mode');
             else
@@ -277,6 +282,8 @@ const BottomDash = GObject.registerClass(
 
             if (this.get_parent() === Main.layoutManager.uiGroup)
                 Main.layoutManager.removeChrome(this);
+
+            Main.panel.set_style(null);
 
             this._workId = null;
 
