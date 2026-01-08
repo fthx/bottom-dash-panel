@@ -27,8 +27,6 @@ const BottomEdge = GObject.registerClass(
 
             this._initPressureBarrier();
             this._setBarrier();
-
-            Main.layoutManager.connectObject('monitors-changed', () => this._setBarrier(), this);
         }
 
         _initPressureBarrier() {
