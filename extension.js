@@ -170,6 +170,9 @@ const BottomDash = GObject.registerClass(
             if (Main.overview.visible)
                 return;
 
+            if (this._setGeometryTimeout)
+                GLib.Source.remove(this._setGeometryTimeout);
+
             this._setGeometryTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
                 if (this._monitor) {
                     const { width: width, height: height, x, y } = this._monitor;
@@ -317,7 +320,7 @@ const BottomDashPanel = GObject.registerClass(
             if (Main.layoutManager.panelBox.get_parent() !== Main.layoutManager.uiGroup)
                 Main.layoutManager.addChrome(Main.layoutManager.panelBox, { affectsStruts: true, trackFullscreen: false });
 
-            Main.overview.searchEntry.get_parent().set_style('margin-top: 0px;');
+            Main.overview.searchEntry.get_parent()?.set_style('margin-top: 0px;');
         }
 
         _hideTopPanel() {
@@ -326,7 +329,7 @@ const BottomDashPanel = GObject.registerClass(
             if (!Main.layoutManager.overviewGroup.get_children().includes(Main.layoutManager.panelBox))
                 Main.layoutManager.overviewGroup.insert_child_at_index(Main.layoutManager.panelBox, 0);
 
-            Main.overview.searchEntry.get_parent().set_style('margin-top: 32px;');
+            Main.overview.searchEntry.get_parent()?.set_style('margin-top: 32px;');
         }
 
         destroy() {
