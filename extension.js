@@ -297,13 +297,36 @@ const BottomDashPanel = GObject.registerClass(
             if (this._settings?.get_boolean('overlap-windows') && this._settings?.get_boolean('hide-top-panel'))
                 global.compositor.disable_unredirect();
 
-            this._dashList = [];
+            this._refresh();
+            Main.layoutManager.connectObject('monitors-changed', () => this._refresh(), this);
+        }
 
-            const monitors = Main.layoutManager.monitors;
-            if (this._settings?.get_boolean('multi-monitor'))
-                monitors?.forEach(monitor => this._initDash(monitor));
-            else
-                this._initDash(Main.layoutManager.primaryMonitor);
+        _refresh() {
+            this._clean();
+
+            if (this._refreshTimeout)
+                GLib.Source.remove(this._refreshTimeout);
+
+            this._refreshTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                this._dashList = [];
+
+                const monitors = Main.layoutManager.monitors;
+                if (this._settings?.get_boolean('multi-monitor'))
+                    monitors?.forEach(monitor => this._initDash(monitor));
+                else
+                    this._initDash(Main.layoutManager.primaryMonitor);
+
+                this._refreshTimeout = null;
+                return GLib.SOURCE_REMOVE;
+            });
+
+        }
+
+        _clean() {
+            if (this._dashList) {
+                this._dashList.forEach(dash => dash?.destroy());
+                this._dashList = null;
+            }
         }
 
         _initDash(monitor) {
@@ -333,11 +356,16 @@ const BottomDashPanel = GObject.registerClass(
         }
 
         destroy() {
+            Main.layoutManager.disconnectObject(this);
+
+            if (this._refreshTimeout) {
+                GLib.Source.remove(this._refreshTimeout);
+                this._refreshTimeout = null;
+            }
+
+            this._clean();
+
             global.compositor.enable_unredirect();
-
-            this._dashList.forEach(dash => dash?.destroy());
-            this._dashList = null;
-
             this._showTopPanel();
         }
     });
@@ -363,8 +391,6 @@ export default class BottomDashPanelExtension extends Extension {
             this._initTimeout = null;
             return GLib.SOURCE_REMOVE;
         });
-
-        Main.layoutManager.connectObject('monitors-changed', () => this._restart(), this);
     }
 
     _restart() {
