@@ -1,5 +1,5 @@
 {
-  "description": "Turn the native GNOME dash into a bottom panel.\n\n Settings: dock mode, hide top panel, display on all monitors, panel height, panel background opacity.\n\n Very short code, very light extension: the dash object is the GNOME dash object itself.",
+  "description": "Turn the native GNOME dash into a bottom panel.\n\n Settings: dock mode, hide top panel, display on all monitors, panel height, panel background color...\n\n Very short code, very light extension: the dash object is the GNOME dash object itself.",
   "name": "Bottom Dash Panel",
   "shell-version": [
     "46",
