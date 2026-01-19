@@ -302,10 +302,24 @@ const BottomDashPanel = GObject.registerClass(
                 this._hideTopPanel();
 
             if (this._settings?.get_boolean('overlap-windows') && this._settings?.get_boolean('hide-top-panel'))
-                global.compositor.disable_unredirect();
+                this._disableUnredirect();
 
             this._refresh();
             Main.layoutManager.connectObject('monitors-changed', () => this._refresh(), this);
+        }
+
+        _disableUnredirect() {
+            if (typeof global.compositor?.disable_unredirect === 'function')
+                global.compositor.disable_unredirect();
+            else
+                Meta.disable_unredirect_for_display(global.display);
+        }
+
+        _enableUnredirect() {
+            if (typeof global.compositor?.enable_unredirect === 'function')
+                global.compositor.enable_unredirect();
+            else
+                Meta.enable_unredirect_for_display(global.display);
         }
 
         _refresh() {
@@ -372,7 +386,7 @@ const BottomDashPanel = GObject.registerClass(
 
             this._clean();
 
-            global.compositor.enable_unredirect();
+            this._enableUnredirect();
             this._showTopPanel();
         }
     });
