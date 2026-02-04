@@ -85,9 +85,11 @@ const BottomEdge = GObject.registerClass(
                 this._barrierTimeout = null;
             }
 
-            this._pressureBarrier?.removeBarrier(this._barrier);
-            this._barrier.destroy();
-            this._barrier = null;
+            if (this._barrier) {
+                this._pressureBarrier?.removeBarrier(this._barrier);
+                this._barrier.destroy();
+                this._barrier = null;
+            }
         }
 
         destroy() {
