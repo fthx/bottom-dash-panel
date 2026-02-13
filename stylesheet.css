@@ -20,6 +20,8 @@
 .bottom-dash-panel .dash-item-container .overview-tile .app-grid-running-dot {
     margin-bottom: 0;
     offset-y: -2px;
+    width: 24px;
+    height: 3px;
 }
 
 .bottom-dash-panel .dash-item-container .overview-tile,
