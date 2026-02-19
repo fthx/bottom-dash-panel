@@ -145,12 +145,10 @@ const BottomDash = GObject.registerClass(
                 this._setBottomEdge();
             this._setGeometry();
 
-            this.connectObject(
-                'notify::width', () => this._setGeometry(),
-                'notify::hover', () => this._onHover(),
-                'scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event),
-                this);
-            this.showAppsButton.connectObject('notify::checked', () => this._onShowAppsButtonClicked(), this);
+            this.connect('notify::width', () => this._setGeometry());
+            this.connect('notify::hover', () => this._onHover());
+            this.connect('scroll-event', (actor, event) => Main.wm.handleWorkspaceScroll(event));
+            this.showAppsButton.connect('notify::checked', () => this._onShowAppsButtonClicked());
 
             if (this._autoHide)
                 Main.overview.connectObject(
@@ -276,7 +274,6 @@ const BottomDash = GObject.registerClass(
             this._bottomEdge?._pressureBarrier?.disconnectObject(this);
             this._bottomEdge?.destroy();
 
-            this.showAppsButton.disconnectObject(this);
             if (this._autoHide)
                 Main.overview.disconnectObject(this);
 
