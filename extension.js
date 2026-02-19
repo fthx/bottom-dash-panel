@@ -93,8 +93,6 @@ const BottomEdge = GObject.registerClass(
         }
 
         destroy() {
-            Main.layoutManager.disconnectObject(this);
-
             this._removeBarrier();
 
             this._pressureBarrier.destroy();
