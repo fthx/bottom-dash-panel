@@ -66,7 +66,7 @@ export default class BottomDashPanelPreferences extends ExtensionPreferences {
 
         const panelMode = new Adw.SwitchRow({
             title: 'Full-width dash',
-            subtitle: 'Panel mode.',
+            subtitle: 'Panel mode.\nIf not checked, the dock looks like the original dash.',
         });
         group2.add(panelMode);
         window._settings.bind('panel-mode', panelMode, 'active', Gio.SettingsBindFlags.DEFAULT);

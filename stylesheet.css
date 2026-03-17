@@ -1,39 +1,39 @@
-.bottom-dash-panel #dash {
+/***** Common *****/
+
+.bottom-dash-panel .dash-item-container .overview-tile .app-grid-running-dot {
+    width: 24px;
+    height: 3px;
+}
+
+.bottom-dash-panel .overview-icon {
+    background-color: transparent;
+}
+
+/***** Panel mode *****/
+
+.bottom-dash-panel-panel-mode #dash {
     padding: 0;
 }
 
-.bottom-dash-panel #dash .dash-background {
+.bottom-dash-panel-panel-mode #dash .dash-background {
+    border-radius: 0;
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 0;
     padding-bottom: 4px;
 }
 
-.bottom-dash-panel-panel-mode {
-    border-radius: 0;
-}
-
-.bottom-dash-panel-dock-mode {
-    border-radius: 8px 8px 0 0;
-}
-
-.bottom-dash-panel .dash-item-container .overview-tile .app-grid-running-dot {
+.bottom-dash-panel-panel-mode .dash-item-container .overview-tile .app-grid-running-dot {
     margin-bottom: 0;
     offset-y: -2px;
-    width: 24px;
-    height: 3px;
 }
 
-.bottom-dash-panel .dash-item-container .overview-tile,
-.bottom-dash-panel #dash .dash-item-container .app-well-app,
-.bottom-dash-panel #dash .dash-item-container .show-apps,
-.bottom-dash-panel .dash-separator {
+.bottom-dash-panel-panel-mode .dash-item-container .overview-tile,
+.bottom-dash-panel-panel-mode #dash .dash-item-container .app-well-app,
+.bottom-dash-panel-panel-mode #dash .dash-item-container .show-apps,
+.bottom-dash-panel-panel-mode .dash-separator {
     margin-top: 0;
     margin-bottom: 0;
     padding-top: 0;
     padding-bottom: 0;
-}
-
-.bottom-dash-panel .overview-icon {
-    background-color: transparent;
 }

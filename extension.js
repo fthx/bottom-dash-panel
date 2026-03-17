@@ -126,11 +126,6 @@ const BottomDash = GObject.registerClass(
             if (this._settings?.get_boolean('sync-color'))
                 Main.panel.set_style(this._background.get_style());
 
-            if (this._settings?.get_boolean('panel-mode'))
-                this._background.add_style_class_name('bottom-dash-panel-panel-mode');
-            else
-                this._background.add_style_class_name('bottom-dash-panel-dock-mode');
-
             this.set_pivot_point(0.5, 1.0);
             this._background.set_pivot_point(0.5, 1.0);
 
@@ -399,6 +394,8 @@ export default class BottomDashPanelExtension extends Extension {
         Main.overview.dash.hide();
 
         Main.layoutManager.uiGroup.add_style_class_name('bottom-dash-panel');
+        if (this._settings?.get_boolean('panel-mode'))
+            Main.layoutManager.uiGroup.add_style_class_name('bottom-dash-panel-panel-mode');
 
         if (this._initTimeout)
             return;
@@ -437,6 +434,7 @@ export default class BottomDashPanelExtension extends Extension {
         this._bottomDashPanel?.destroy();
         this._bottomDashPanel = null;
         Main.layoutManager.uiGroup.remove_style_class_name('bottom-dash-panel');
+        Main.layoutManager.uiGroup.remove_style_class_name('bottom-dash-panel-panel-mode');
 
         Main.overview.dash.show();
 
