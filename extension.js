@@ -123,8 +123,12 @@ const BottomDash = GObject.registerClass(
                 this._background.set_style('background-color: st-mix(-st-accent-color, black, 30%);');
             else
                 this._background.set_style(`background-color: ${this._settings?.get_string('background-color')};`);
-            if (this._settings?.get_boolean('sync-color'))
+            if (this._settings?.get_boolean('sync-color')) {
                 Main.panel.set_style(this._background.get_style());
+
+                // GNOME Shell resets Main.panel.style to null right after emitting 'hidden'
+                Main.overview.connectObject('hidden', () => this._syncPanelStyle(), this);
+            }
 
             this.set_pivot_point(0.5, 1.0);
             this._background.set_pivot_point(0.5, 1.0);
@@ -160,6 +164,18 @@ const BottomDash = GObject.registerClass(
                 }
 
                 this._setBottomEdgeTimeout = null;
+                return GLib.SOURCE_REMOVE;
+            });
+        }
+
+        _syncPanelStyle() {
+            if (this._syncPanelStyleTimeout)
+                GLib.Source.remove(this._syncPanelStyleTimeout);
+
+            this._syncPanelStyleTimeout = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+                Main.panel.set_style(this._background.get_style());
+
+                this._syncPanelStyleTimeout = null;
                 return GLib.SOURCE_REMOVE;
             });
         }
@@ -266,11 +282,15 @@ const BottomDash = GObject.registerClass(
                 this._setGeometryTimeout = null;
             }
 
+            if (this._syncPanelStyleTimeout) {
+                GLib.Source.remove(this._syncPanelStyleTimeout);
+                this._syncPanelStyleTimeout = null;
+            }
+
             this._bottomEdge?._pressureBarrier?.disconnectObject(this);
             this._bottomEdge?.destroy();
 
-            if (this._autoHide)
-                Main.overview.disconnectObject(this);
+            Main.overview.disconnectObject(this);
 
             if (this.get_parent() === Main.layoutManager.uiGroup)
                 Main.layoutManager.removeChrome(this);
